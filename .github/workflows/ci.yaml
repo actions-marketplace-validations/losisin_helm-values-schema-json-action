@@ -2,7 +2,6 @@ name: Continuous Integration
 
 on:
   pull_request:
-  push:
     branches:
       - main
       - 'releases/*'
@@ -18,11 +17,11 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
           cache: npm
@@ -43,6 +42,13 @@ jobs:
         id: npm-ci-test
         run: npm run ci-test
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   test-action:
     name: GitHub Actions Test
     runs-on: ${{ matrix.os }}
@@ -53,15 +59,22 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Set Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v3.12.1
-
-      - name: Test Action
+      - name: Test 1
         id: test-action
         uses: ./
         with:
-          input: __tests__/values.yaml
+          values: __tests__/fixtures/values.yaml
+          output: __tests__/fixtures/values.schema.json
+
+      - name: Test 2
+        continue-on-error: true
+        uses: ./
+        with:
+          working-directory: __tests__/fixtures
+          fail-on-diff: true
+
+      - name: Print Cached Path
+        id: output
+        run: echo "${{ steps.test-action.outputs.plugin-path }}"
