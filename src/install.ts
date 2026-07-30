@@ -6,7 +6,7 @@ import * as tc from '@actions/tool-cache'
 
 const pluginName = 'schema'
 const pluginRepository = 'helm-values-schema-json'
-const version = 'v2.3.1'
+const version = 'v2.5.0'
 
 export function getPlugin(pluginVersion: string): string {
   const osArch = os.arch()
@@ -47,7 +47,7 @@ export function findPlugin(pluginFolder: string): string {
   const executableExtension = os.type().startsWith('Win') ? '.exe' : ''
   const targetFileName = pluginName + executableExtension
 
-  const foundFiles = files.filter(file => {
+  const foundFiles = files.filter((file) => {
     const filePath = path.join(pluginFolder, file)
     if (fs.statSync(filePath).isDirectory()) {
       return false
